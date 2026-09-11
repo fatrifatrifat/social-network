@@ -1,0 +1,22 @@
+# started on Fri Sep 11 12:28:47 2026
+
+
+ Performance counter stats for './build-per-id/social-network':
+
+                 0      context-switches:u               #      0.0 cs/sec  cs_per_second     
+                 0      cpu-migrations:u                 #      0.0 migrations/sec  migrations_per_second
+            16,722      page-faults:u                    #   1957.8 faults/sec  page_faults_per_second
+          8,541.09 msec task-clock:u                     #      nan CPUs  CPUs_utilized       
+        70,479,123      L1-dcache-load-misses:u          #      0.3 %  l1d_miss_rate            (42.84%)
+        45,593,488      branch-misses:u                  #      0.9 %  branch_miss_rate         (42.85%)
+     5,097,810,639      branches:u                       #    596.9 M/sec  branch_frequency     (42.86%)
+    22,200,138,981      cpu-cycles:u                     #      2.6 GHz  cycles_frequency       (42.88%)
+    32,343,842,379      instructions:u                   #      1.5 instructions  insn_per_cycle  (42.87%)
+     8,123,670,455      stalled-cycles-frontend:u        #     0.37 frontend_cycles_idle        (42.86%)
+
+       8.548598437 seconds time elapsed
+
+       5.503601000 seconds user
+       2.934140000 seconds sys
+
+
