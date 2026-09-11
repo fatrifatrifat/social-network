@@ -12,8 +12,11 @@ target_compile_features(social-network PRIVATE cxx_std_23)
 find_package(libpqxx REQUIRED)
 find_package(simdjson REQUIRED)
 
+add_subdirectory(src/graph)
+
 target_link_libraries(social-network
   PRIVATE
     libpqxx::pqxx
     simdjson::simdjson
+    graph
 )
