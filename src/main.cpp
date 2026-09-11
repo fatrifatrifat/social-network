@@ -51,8 +51,6 @@ Relation parse_relation(std::string_view str) {
 }
 
 int main() {
-  std::println("Welcome to the: Social Network Graph");
-
   ondemand::parser parser;
   auto json = simdjson::padded_string::load("data/relations.json");
   ondemand::document doc = parser.iterate(json);
@@ -76,7 +74,7 @@ int main() {
 
   {
     std::vector<std::uint64_t> degrees(graph.nodes.size());
-    std::map<VertexId, std::vector<Edge>> edges_per_id;
+    std::vector<Edge> raw_edges;
 
     for (auto value : doc["edges"].get_array()) {
       auto obj = value.get_object();
@@ -85,16 +83,14 @@ int main() {
       const VertexId target = static_cast<VertexId>(obj["target"].get_uint64());
       const Relation relation = parse_relation(obj["type"].get_string());
 
-      ++degrees[source];
-      edges_per_id[source].push_back(Edge{
+      raw_edges.push_back(Edge{
           .from = source,
           .to = target,
           .relation = relation,
       });
 
       if (relation != Relation::Follows) {
-        ++degrees[target];
-        edges_per_id[target].push_back(Edge{
+        raw_edges.push_back(Edge{
             .from = target,
             .to = source,
             .relation = relation,
@@ -102,19 +98,18 @@ int main() {
       }
     }
 
-    for (const auto &[_, edges] : edges_per_id) {
-      for (const auto &e : edges) {
-        graph.edges.push_back(Edge{
-            .from = e.from,
-            .to = e.to,
-            .relation = e.relation,
-        });
-      }
-    }
+    for (const auto &e : raw_edges)
+      ++degrees[e.from];
 
     graph.offsets.resize(graph.nodes.size() + 1);
     for (auto i{0uz}; i < degrees.size(); ++i)
       graph.offsets[i + 1] = graph.offsets[i] + degrees[i];
+
+    graph.edges.resize(raw_edges.size());
+    auto positions = graph.offsets;
+
+    for (const auto &e : raw_edges)
+      graph.edges[positions[e.from]++] = e;
   }
 
   for (const auto &node : graph.nodes) {
