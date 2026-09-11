@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.23)
+project(SocialNetwork)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_executable(social-network)
+
+target_sources(social-network PRIVATE src/main.cpp)
+
+target_compile_features(social-network PRIVATE cxx_std_23)
+
+find_package(libpqxx REQUIRED)
+find_package(simdjson REQUIRED)
+
+target_link_libraries(social-network
+  PRIVATE
+    libpqxx::pqxx
+    simdjson::simdjson
+)

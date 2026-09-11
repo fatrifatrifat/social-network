@@ -1,0 +1,56 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "name": "Alice",
+      "age": 24
+    },
+    {
+      "id": 1,
+      "name": "Bob",
+      "age": 27
+    },
+    {
+      "id": 2,
+      "name": "Charlie",
+      "age": 23
+    },
+    {
+      "id": 3,
+      "name": "Daniel",
+      "age": 18
+    },
+    {
+      "id": 4,
+      "name": "Eric",
+      "age": 19
+    }
+  ],
+  "edges": [
+    {
+      "source": 2,
+      "target": 4,
+      "type": "friend"
+    },
+    {
+      "source": 0,
+      "target": 1,
+      "type": "friend"
+    },
+    {
+      "source": 3,
+      "target": 2,
+      "type": "follows"
+    },
+    {
+      "source": 0,
+      "target": 3,
+      "type": "friend"
+    },
+    {
+      "source": 2,
+      "target": 1,
+      "type": "coworker"
+    }
+  ]
+}
