@@ -1,0 +1,21 @@
+# started on Fri Sep 11 22:34:46 2026
+
+
+ Performance counter stats for './build/social-network':
+
+                 0      context-switches:u               #      0.0 cs/sec  cs_per_second     
+                 0      cpu-migrations:u                 #      0.0 migrations/sec  migrations_per_second
+            36,136      page-faults:u                    #   4701.6 faults/sec  page_faults_per_second
+          7,685.93 msec task-clock:u                     #      nan CPUs  CPUs_utilized       
+        29,997,796      branch-misses:u                  #      0.7 %  branch_miss_rate         (50.01%)
+     4,300,912,134      branches:u                       #    559.6 M/sec  branch_frequency     (50.01%)
+    17,487,283,837      cpu-cycles:u                     #      2.3 GHz  cycles_frequency       (66.67%)
+    28,004,627,002      instructions:u                   #      1.6 instructions  insn_per_cycle  (49.99%)
+     6,903,382,295      stalled-cycles-frontend:u        #     0.40 frontend_cycles_idle        (49.99%)
+
+       7.700534732 seconds time elapsed
+
+       4.387057000 seconds user
+       3.150885000 seconds sys
+
+
