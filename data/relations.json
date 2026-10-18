@@ -6,64 +6,64 @@
       "age": 24
     },
     {
-      "id": 1,
+      "id": 4,
       "name": "Bob",
       "age": 27
     },
     {
-      "id": 2,
+      "id": 8,
       "name": "Charlie",
       "age": 23
     },
     {
-      "id": 3,
+      "id": 12,
       "name": "Daniel",
       "age": 18
     },
     {
-      "id": 4,
+      "id": 16,
       "name": "Eric",
       "age": 19
     },
     {
-      "id": 5,
+      "id": 20,
       "name": "Fatoumata",
       "age": 67
     }
   ],
   "edges": [
     {
-      "source": 2,
+      "source": 8,
+      "target": 16,
+      "type": "friend"
+    },
+    {
+      "source": 0,
       "target": 4,
       "type": "friend"
     },
     {
-      "source": 0,
-      "target": 1,
-      "type": "friend"
-    },
-    {
-      "source": 3,
-      "target": 2,
+      "source": 12,
+      "target": 8,
       "type": "follows"
     },
     {
       "source": 0,
-      "target": 3,
+      "target": 12,
       "type": "friend"
     },
     {
-      "source": 2,
-      "target": 1,
+      "source": 8,
+      "target": 4,
       "type": "coworker"
     },
     {
-      "source": 2,
-      "target": 5,
+      "source": 8,
+      "target": 20,
       "type": "coworker"
     },
     {
-      "source": 4,
+      "source": 16,
       "target": 0,
       "type": "follows"
     }

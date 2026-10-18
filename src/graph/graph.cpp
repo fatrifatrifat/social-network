@@ -3,24 +3,37 @@
 #include <queue>
 #include <ranges>
 #include <span>
-#include <stack>
+#include <stdexcept>
 #include <vector>
 
 namespace graph {
 
 Graph Graph::from_edges(std::vector<Node> nodes,
-                        std::span<const Edge> relations) {
+                        std::span<const ExternalEdge> relations) {
+  IdMapper id_mapper;
+  for (auto i{0uz}; i < nodes.size(); ++i)
+    if (id_mapper.add(nodes[i].id) != i)
+      throw std::invalid_argument("duplicate node id");
+
+  const auto to_edge = [&](NodeId from, NodeId to, Relation relation) {
+    return Edge{.from = id_mapper.to_idx.at(from),
+                .to = id_mapper.to_idx.at(to),
+                .relation = relation};
+  };
+
   std::vector<Edge> directed;
   directed.reserve(relations.size() * 2);
 
   for (const auto &e : relations) {
-    directed.push_back(e);
+    directed.push_back(to_edge(e.from, e.to, e.relation));
     if (e.relation != Relation::Follows)
-      directed.push_back(
-          Edge{.from = e.to, .to = e.from, .relation = e.relation});
+      directed.push_back(to_edge(e.to, e.from, e.relation));
   }
 
-  Graph graph{.nodes = std::move(nodes), .edges = {}, .offsets = {}};
+  Graph graph{.nodes = std::move(nodes),
+              .edges = {},
+              .offsets = {},
+              .id_mapper = std::move(id_mapper)};
 
   graph.offsets.resize(graph.nodes.size() + 1);
   for (const auto &e : directed)
@@ -36,14 +49,27 @@ Graph Graph::from_edges(std::vector<Node> nodes,
   return graph;
 }
 
-std::span<const Edge> Graph::neighbors(const VertexId id) const {
-  const auto begin = offsets[id];
-  const auto end = offsets[id + 1];
+std::span<const Edge> Graph::neighbors(const VertexId idx) const {
+  const auto begin = offsets[idx];
+  const auto end = offsets[idx + 1];
 
   return std::span{edges.begin() + begin, end - begin};
 }
 
-std::vector<std::vector<VertexId>> Graph::bfs(VertexId a) const {
+std::vector<std::vector<NodeId>>
+Graph::to_external(const std::vector<std::vector<VertexId>> &levels) const {
+  return levels | std::views::transform([&](const auto &level) {
+           return level | std::views::transform([&](VertexId idx) {
+                    return id_mapper.to_ext[idx];
+                  }) |
+                  std::ranges::to<std::vector>();
+         }) |
+         std::ranges::to<std::vector>();
+}
+
+std::vector<std::vector<NodeId>> Graph::bfs(NodeId a_id) const {
+  const VertexId a = id_mapper.to_idx.at(a_id);
+
   std::queue<VertexId> q;
   std::vector<bool> visited(nodes.size(), false);
   visited[a] = true;
@@ -71,13 +97,13 @@ std::vector<std::vector<VertexId>> Graph::bfs(VertexId a) const {
     }
   }
 
-  return result;
+  return to_external(result);
 }
 
-std::vector<std::vector<VertexId>> Graph::dfs(VertexId a) const {
-  // std::stack<std::pair<VertexId, std::size_t>> stack;
+std::vector<std::vector<NodeId>> Graph::dfs(NodeId a_id) const {
+  const VertexId a = id_mapper.to_idx.at(a_id);
+
   std::vector<bool> visited(nodes.size(), false);
-  // stack.push({a, 0});
   visited[a] = true;
 
   std::vector<std::vector<VertexId>> result{{a}};
@@ -101,11 +127,14 @@ std::vector<std::vector<VertexId>> Graph::dfs(VertexId a) const {
 
   recurse(a);
 
-  return result;
+  return to_external(result);
 }
 
-std::optional<std::vector<VertexId>> Graph::shortest_path(VertexId a,
-                                                          VertexId b) const {
+std::optional<std::vector<NodeId>> Graph::shortest_path(NodeId a_id,
+                                                        NodeId b_id) const {
+  const VertexId a = id_mapper.to_idx.at(a_id);
+  const VertexId b = id_mapper.to_idx.at(b_id);
+
   std::queue<VertexId> q;
   std::vector<bool> visited(nodes.size(), false);
   std::vector<std::optional<VertexId>> parent(nodes.size());
@@ -113,7 +142,7 @@ std::optional<std::vector<VertexId>> Graph::shortest_path(VertexId a,
   parent[a] = std::nullopt;
   q.push(a);
 
-  std::vector<VertexId> lineage;
+  std::vector<NodeId> lineage;
   while (!q.empty()) {
     const auto q_size = q.size();
 
@@ -132,10 +161,10 @@ std::optional<std::vector<VertexId>> Graph::shortest_path(VertexId a,
         if (n.to == b) {
           auto curr = n.to;
           while (parent[curr].has_value()) {
-            lineage.push_back(curr);
+            lineage.push_back(id_mapper.to_ext[curr]);
             curr = parent[curr].value();
           }
-          lineage.push_back(curr);
+          lineage.push_back(id_mapper.to_ext[curr]);
 
           return std::make_optional(lineage | std::views::reverse |
                                     std::ranges::to<std::vector>());
