@@ -32,8 +32,8 @@ struct Graph {
   void process_offsets(std::span<const uint64_t> degrees);
 
   [[nodiscard]] std::span<const Edge> neighbors(const VertexId id) const;
-  void bfs(VertexId a) const;
-  void dfs(VertexId a) const;
+  std::vector<std::vector<VertexId>> bfs(VertexId a) const;
+  std::vector<std::vector<VertexId>> dfs(VertexId a) const;
   [[nodiscard]] std::optional<std::vector<VertexId>>
   shortest_path(VertexId a, VertexId b) const;
 };

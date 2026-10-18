@@ -24,6 +24,11 @@
       "id": 4,
       "name": "Eric",
       "age": 19
+    },
+    {
+      "id": 5,
+      "name": "Fatoumata",
+      "age": 67
     }
   ],
   "edges": [
@@ -51,6 +56,16 @@
       "source": 2,
       "target": 1,
       "type": "coworker"
+    },
+    {
+      "source": 2,
+      "target": 5,
+      "type": "coworker"
+    },
+    {
+      "source": 4,
+      "target": 0,
+      "type": "follows"
     }
   ]
 }

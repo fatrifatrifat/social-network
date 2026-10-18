@@ -1,6 +1,10 @@
 #include <graph.hpp>
+#include <optional>
 #include <queue>
+#include <span>
 #include <stack>
+#include <string>
+#include <vector>
 
 namespace graph {
 
@@ -98,13 +102,14 @@ constexpr Relation Graph::parse_relation(std::string_view str) {
   std::terminate();
 }
 
-void Graph::bfs(VertexId a) const {
+std::vector<std::vector<VertexId>> Graph::bfs(VertexId a) const {
   std::queue<VertexId> q;
   std::vector<bool> visited(nodes.size(), false);
   visited[a] = true;
   q.push(a);
 
-  std::size_t level{};
+  std::vector<std::vector<VertexId>> result{{a}};
+
   while (!q.empty()) {
     const auto q_size = q.size();
 
@@ -112,25 +117,31 @@ void Graph::bfs(VertexId a) const {
       const auto front = q.front();
       q.pop();
 
+      std::vector<VertexId> level;
       for (const auto &n : neighbors(front)) {
         if (visited[n.to])
           continue;
         visited[n.to] = true;
         q.push(n.to);
+        level.push_back(n.to);
       }
+      if (!level.empty())
+        result.push_back(std::move(level));
     }
   }
+
+  return result;
 }
 
-void Graph::dfs(VertexId a) const {
+std::vector<std::vector<VertexId>> Graph::dfs(VertexId a) const {
   std::stack<std::pair<VertexId, std::size_t>> stack;
   std::vector<bool> visited(nodes.size(), false);
   stack.push({a, 0});
   visited[a] = true;
 
-  std::size_t level{};
+  std::vector<std::vector<VertexId>> result{{a}};
+
   while (!stack.empty()) {
-    const auto s_size = stack.size();
     const auto [top, depth] = stack.top();
     stack.pop();
 
@@ -139,8 +150,16 @@ void Graph::dfs(VertexId a) const {
         continue;
       visited[n.to] = true;
       stack.push({n.to, depth + 1});
+
+      if (result.size() <= depth + 2) {
+        result.push_back({n.to});
+      } else {
+        result[depth + 2].push_back(n.to);
+      }
     }
   }
+
+  return result;
 }
 
 std::optional<std::vector<VertexId>> Graph::shortest_path(VertexId a,
