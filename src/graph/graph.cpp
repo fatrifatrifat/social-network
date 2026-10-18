@@ -85,7 +85,7 @@ void Graph::parse_json(std::string_view str) {
   parse_raw_edges(doc["edges"].get_array());
 }
 
-Relation Graph::parse_relation(std::string_view str) {
+constexpr Relation Graph::parse_relation(std::string_view str) {
   if (str == "friend")
     return Relation::Friend;
 
@@ -143,13 +143,16 @@ void Graph::dfs(VertexId a) const {
   }
 }
 
-void Graph::shortest_path(VertexId a, VertexId b) const {
+std::optional<std::vector<VertexId>> Graph::shortest_path(VertexId a,
+                                                          VertexId b) const {
   std::queue<VertexId> q;
   std::vector<bool> visited(nodes.size(), false);
+  std::vector<std::optional<VertexId>> parent(nodes.size());
   visited[a] = true;
+  parent[a] = std::nullopt;
   q.push(a);
 
-  std::size_t level{};
+  std::vector<VertexId> lineage;
   while (!q.empty()) {
     const auto q_size = q.size();
 
@@ -160,11 +163,27 @@ void Graph::shortest_path(VertexId a, VertexId b) const {
       for (const auto &n : neighbors(front)) {
         if (visited[n.to])
           continue;
+
+        parent[n.to] = n.from;
         visited[n.to] = true;
         q.push(n.to);
+
+        if (n.to == b) {
+          auto curr = n.to;
+          while (parent[curr].has_value()) {
+            lineage.push_back(curr);
+            curr = parent[curr].value();
+          }
+          lineage.push_back(curr);
+
+          return std::make_optional(lineage | std::views::reverse |
+                                    std::ranges::to<std::vector>());
+        }
       }
     }
   }
+
+  return std::nullopt;
 }
 
 } // namespace graph

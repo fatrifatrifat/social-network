@@ -28,13 +28,14 @@ struct Graph {
   void parse_nodes(auto json_nodes);
   void parse_raw_edges(auto json_edges);
   void parse_json(std::string_view str);
-  Relation parse_relation(std::string_view str);
+  [[nodiscard]] constexpr Relation parse_relation(std::string_view str);
   void process_offsets(std::span<const uint64_t> degrees);
 
-  std::span<const Edge> neighbors(const VertexId id) const;
+  [[nodiscard]] std::span<const Edge> neighbors(const VertexId id) const;
   void bfs(VertexId a) const;
   void dfs(VertexId a) const;
-  void shortest_path(VertexId a, VertexId b) const;
+  [[nodiscard]] std::optional<std::vector<VertexId>>
+  shortest_path(VertexId a, VertexId b) const;
 };
 
 } // namespace graph
