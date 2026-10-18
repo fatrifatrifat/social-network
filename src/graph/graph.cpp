@@ -1,105 +1,46 @@
 #include <graph.hpp>
 #include <optional>
 #include <queue>
+#include <ranges>
 #include <span>
 #include <stack>
-#include <string>
 #include <vector>
 
 namespace graph {
+
+Graph Graph::from_edges(std::vector<Node> nodes,
+                        std::span<const Edge> relations) {
+  std::vector<Edge> directed;
+  directed.reserve(relations.size() * 2);
+
+  for (const auto &e : relations) {
+    directed.push_back(e);
+    if (e.relation != Relation::Follows)
+      directed.push_back(
+          Edge{.from = e.to, .to = e.from, .relation = e.relation});
+  }
+
+  Graph graph{.nodes = std::move(nodes), .edges = {}, .offsets = {}};
+
+  graph.offsets.resize(graph.nodes.size() + 1);
+  for (const auto &e : directed)
+    ++graph.offsets[e.from + 1];
+  for (auto i{1uz}; i < graph.offsets.size(); ++i)
+    graph.offsets[i] += graph.offsets[i - 1];
+
+  graph.edges.resize(directed.size());
+  auto positions = graph.offsets;
+  for (const auto &e : directed)
+    graph.edges[positions[e.from]++] = e;
+
+  return graph;
+}
 
 std::span<const Edge> Graph::neighbors(const VertexId id) const {
   const auto begin = offsets[id];
   const auto end = offsets[id + 1];
 
   return std::span{edges.begin() + begin, end - begin};
-}
-
-void Graph::parse_nodes(auto json_nodes) {
-  for (auto value : json_nodes) {
-    auto obj = value.get_object();
-
-    const VertexId id = static_cast<VertexId>(obj["id"].get_uint64());
-    const std::string_view name = obj["name"].get_string();
-    const std::uint16_t age =
-        static_cast<std::uint16_t>(obj["age"].get_uint32());
-
-    nodes.push_back(Node{
-        .id = id,
-        .name = std::string(name),
-        .age = age,
-    });
-  }
-}
-
-void Graph::process_offsets(std::span<const uint64_t> degrees) {
-  offsets.resize(nodes.size() + 1);
-  for (auto i{0uz}; i < degrees.size(); ++i)
-    offsets[i + 1] = offsets[i] + degrees[i];
-}
-
-void Graph::parse_raw_edges(auto json_edges) {
-  std::vector<Edge> raw_edges;
-
-  for (auto value : json_edges) {
-    auto obj = value.get_object();
-
-    const VertexId source = static_cast<VertexId>(obj["source"].get_uint64());
-    const VertexId target = static_cast<VertexId>(obj["target"].get_uint64());
-    const Relation relation = Graph::parse_relation(obj["type"].get_string());
-
-    raw_edges.push_back(Edge{
-        .from = source,
-        .to = target,
-        .relation = relation,
-    });
-
-    if (relation != Relation::Follows) {
-      raw_edges.push_back(Edge{
-          .from = target,
-          .to = source,
-          .relation = relation,
-      });
-    }
-  }
-
-  {
-    std::vector<std::uint64_t> degrees(nodes.size());
-
-    for (const auto &e : raw_edges)
-      ++degrees[e.from];
-
-    process_offsets(std::span{degrees});
-
-    edges.resize(raw_edges.size());
-    auto positions = offsets;
-
-    for (const auto &e : raw_edges)
-      edges[positions[e.from]++] = e;
-  }
-}
-
-void Graph::parse_json(std::string_view str) {
-  using namespace simdjson;
-  ondemand::parser parser;
-  auto json = simdjson::padded_string::load(str);
-  ondemand::document doc = parser.iterate(json);
-
-  parse_nodes(doc["nodes"].get_array());
-  parse_raw_edges(doc["edges"].get_array());
-}
-
-constexpr Relation Graph::parse_relation(std::string_view str) {
-  if (str == "friend")
-    return Relation::Friend;
-
-  if (str == "follows")
-    return Relation::Follows;
-
-  if (str == "coworker")
-    return Relation::Coworker;
-
-  std::terminate();
 }
 
 std::vector<std::vector<VertexId>> Graph::bfs(VertexId a) const {

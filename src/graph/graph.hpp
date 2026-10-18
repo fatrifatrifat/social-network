@@ -1,5 +1,9 @@
 #pragma once
-#include <simdjson.h>
+#include <cstdint>
+#include <optional>
+#include <span>
+#include <string>
+#include <vector>
 
 namespace graph {
 
@@ -25,11 +29,8 @@ struct Graph {
   std::vector<Edge> edges;
   std::vector<std::uint64_t> offsets;
 
-  void parse_nodes(auto json_nodes);
-  void parse_raw_edges(auto json_edges);
-  void parse_json(std::string_view str);
-  [[nodiscard]] constexpr Relation parse_relation(std::string_view str);
-  void process_offsets(std::span<const uint64_t> degrees);
+  [[nodiscard]] static Graph from_edges(std::vector<Node> nodes,
+                                        std::span<const Edge> relations);
 
   [[nodiscard]] std::span<const Edge> neighbors(const VertexId id) const;
   std::vector<std::vector<VertexId>> bfs(VertexId a) const;
