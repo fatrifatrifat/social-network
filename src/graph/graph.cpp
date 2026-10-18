@@ -75,30 +75,31 @@ std::vector<std::vector<VertexId>> Graph::bfs(VertexId a) const {
 }
 
 std::vector<std::vector<VertexId>> Graph::dfs(VertexId a) const {
-  std::stack<std::pair<VertexId, std::size_t>> stack;
+  // std::stack<std::pair<VertexId, std::size_t>> stack;
   std::vector<bool> visited(nodes.size(), false);
-  stack.push({a, 0});
+  // stack.push({a, 0});
   visited[a] = true;
 
   std::vector<std::vector<VertexId>> result{{a}};
 
-  while (!stack.empty()) {
-    const auto [top, depth] = stack.top();
-    stack.pop();
-
-    for (const auto &n : neighbors(top)) {
-      if (visited[n.to])
+  auto recurse = [&](this auto &&self, const VertexId &top,
+                     const std::size_t depth = 0) -> void {
+    for (const auto &e : neighbors(top)) {
+      if (visited[e.to])
         continue;
-      visited[n.to] = true;
-      stack.push({n.to, depth + 1});
+      visited[e.to] = true;
 
-      if (result.size() <= depth + 2) {
-        result.push_back({n.to});
+      if (result.size() <= depth + 1) {
+        result.push_back({e.to});
       } else {
-        result[depth + 2].push_back(n.to);
+        result[depth + 1].push_back(e.to);
       }
+
+      self(e.to, depth + 1);
     }
-  }
+  };
+
+  recurse(a);
 
   return result;
 }
