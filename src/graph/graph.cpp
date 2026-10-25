@@ -203,17 +203,11 @@ std::vector<std::vector<NodeId>> Graph::kosaraju() const {
   visited.assign(node_count, false);
   std::ranges::reverse(order);
 
-  std::vector<VertexId> roots(node_count, 0);
-
   for (auto v : order) {
     if (!visited[v]) {
       std::vector<VertexId> component;
       out_dfs(v, adj_rev, component);
       components.push_back(component);
-
-      VertexId root = component.front();
-      for (const auto u : component)
-        roots[u] = root;
     }
   }
 
