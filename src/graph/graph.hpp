@@ -72,10 +72,10 @@ struct Graph {
   [[nodiscard]] std::optional<std::vector<NodeId>>
   shortest_path(NodeId a, NodeId b) const;
   std::vector<std::vector<NodeId>> kosaraju() const;
+  [[nodiscard]] std::span<const Edge> neighbors(VertexId idx) const;
 
 private:
   // Internal helpers speak indices only
-  [[nodiscard]] std::span<const Edge> neighbors(VertexId idx) const;
   [[nodiscard]] std::vector<std::vector<VertexId>> adjacency() const;
   [[nodiscard]] std::vector<std::vector<VertexId>> reverse_adjacency() const;
   [[nodiscard]] std::vector<std::vector<NodeId>>
