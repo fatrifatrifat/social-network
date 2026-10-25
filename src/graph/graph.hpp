@@ -69,18 +69,17 @@ struct Graph {
   // Public API speaks external ids only
   [[nodiscard]] std::vector<std::vector<NodeId>> bfs(NodeId a) const;
   [[nodiscard]] std::vector<std::vector<NodeId>> dfs(NodeId a) const;
-  [[nodiscard]] std::vector<NodeId> out_dfs(NodeId a) const;
   [[nodiscard]] std::optional<std::vector<NodeId>>
   shortest_path(NodeId a, NodeId b) const;
-  std::vector<std::vector<NodeId>> kasoraju() const;
+  std::vector<std::vector<NodeId>> kosaraju() const;
 
 private:
   // Internal helpers speak indices only
   [[nodiscard]] std::span<const Edge> neighbors(VertexId idx) const;
+  [[nodiscard]] std::vector<std::vector<VertexId>> adjacency() const;
+  [[nodiscard]] std::vector<std::vector<VertexId>> reverse_adjacency() const;
   [[nodiscard]] std::vector<std::vector<NodeId>>
   to_external(const std::vector<std::vector<VertexId>> &levels) const;
-  [[nodiscard]] std::vector<NodeId>
-  to_external(const std::vector<VertexId> &levels) const;
 };
 
 } // namespace graph

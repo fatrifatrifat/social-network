@@ -8,7 +8,7 @@ int main() {
 
   [[maybe_unused]] const auto bfs = graph.bfs(graph::NodeId{0});
 
-  [[maybe_unused]] const auto dfs = graph.kasoraju();
+  [[maybe_unused]] const auto dfs = graph.kosaraju();
   for (const auto &l : dfs) {
     for (const auto &v : l) {
       std::print("{} ", std::to_underlying(v));

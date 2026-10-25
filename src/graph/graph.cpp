@@ -68,14 +68,6 @@ Graph::to_external(const std::vector<std::vector<VertexId>> &levels) const {
          std::ranges::to<std::vector>();
 }
 
-std::vector<NodeId>
-Graph::to_external(const std::vector<VertexId> &levels) const {
-  return levels | std::views::transform([&](VertexId idx) {
-           return id_mapper.to_ext[idx];
-         }) |
-         std::ranges::to<std::vector>();
-}
-
 std::vector<std::vector<NodeId>> Graph::bfs(NodeId a_id) const {
   const VertexId a = id_mapper.to_idx.at(a_id);
 
@@ -132,25 +124,6 @@ std::vector<std::vector<NodeId>> Graph::dfs(NodeId a_id) const {
   return to_external(result);
 }
 
-std::vector<NodeId> Graph::out_dfs(NodeId a_id) const {
-  const VertexId a = id_mapper.to_idx.at(a_id);
-  std::vector<bool> visited(nodes.size(), false);
-  std::vector<VertexId> result(nodes.size());
-
-  auto recurse = [&](this auto &&self, const VertexId &top) {
-    visited[top] = true;
-    for (const auto &e : neighbors(top)) {
-      if (visited[e.to])
-        continue;
-
-      self(e.to);
-    }
-    result.push_back(top);
-  };
-
-  return to_external(result);
-}
-
 std::optional<std::vector<NodeId>> Graph::shortest_path(NodeId a_id,
                                                         NodeId b_id) const {
   const VertexId a = id_mapper.to_idx.at(a_id);
@@ -197,19 +170,14 @@ std::optional<std::vector<NodeId>> Graph::shortest_path(NodeId a_id,
   return std::nullopt;
 }
 
-std::vector<std::vector<NodeId>> Graph::kasoraju() const {
+std::vector<std::vector<NodeId>> Graph::kosaraju() const {
   const auto node_count = nodes.size();
 
   std::vector<std::vector<VertexId>> components;
   std::vector<VertexId> order;
   std::vector<bool> visited(node_count, false);
 
-  std::vector<std::vector<VertexId>> adj(node_count);
-  for (auto v{0uz}; v < node_count; ++v) {
-    for (const auto &e : neighbors(v)) {
-      adj[v].push_back(e.to);
-    }
-  }
+  const auto adj = adjacency();
 
   auto out_dfs = [&visited, this](this auto &&self, const auto &top,
                                   const std::vector<std::vector<VertexId>> &adj,
@@ -230,12 +198,7 @@ std::vector<std::vector<NodeId>> Graph::kasoraju() const {
     out_dfs(idx, adj, order);
   }
 
-  std::vector<std::vector<VertexId>> adj_rev(node_count);
-  for (auto v{0uz}; v < node_count; ++v) {
-    for (const auto &e : neighbors(v)) {
-      adj_rev[e.to].push_back(v);
-    }
-  }
+  const auto adj_rev = reverse_adjacency();
 
   visited.assign(node_count, false);
   std::ranges::reverse(order);
@@ -257,4 +220,25 @@ std::vector<std::vector<NodeId>> Graph::kasoraju() const {
   return to_external(components);
 }
 
+std::vector<std::vector<VertexId>> Graph::adjacency() const {
+  std::vector<std::vector<VertexId>> adj(nodes.size());
+  for (auto v{0uz}; v < nodes.size(); ++v) {
+    for (const auto &e : neighbors(v)) {
+      adj[v].push_back(e.to);
+    }
+  }
+
+  return adj;
+}
+
+std::vector<std::vector<VertexId>> Graph::reverse_adjacency() const {
+  std::vector<std::vector<VertexId>> adj(nodes.size());
+  for (auto v{0uz}; v < nodes.size(); ++v) {
+    for (const auto &e : neighbors(v)) {
+      adj[e.to].push_back(v);
+    }
+  }
+
+  return adj;
+}
 } // namespace graph
