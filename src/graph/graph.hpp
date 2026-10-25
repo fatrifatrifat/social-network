@@ -10,7 +10,7 @@ namespace graph {
 
 // External id, as stored in the database. May have gaps and is never used to
 // index an array. An enum class so it can't be mixed up with VertexId: the
-// compiler rejects `VertexId v = node_id;` and vice versa.
+// compiler rejects `VertexId v = node_id;` and vice versa
 enum class NodeId : std::int64_t {};
 
 // Internal index into the CSR arrays, always dense in [0, nodes.size())
@@ -67,16 +67,20 @@ struct Graph {
   from_edges(std::vector<Node> nodes, std::span<const ExternalEdge> relations);
 
   // Public API speaks external ids only
-  std::vector<std::vector<NodeId>> bfs(NodeId a) const;
-  std::vector<std::vector<NodeId>> dfs(NodeId a) const;
+  [[nodiscard]] std::vector<std::vector<NodeId>> bfs(NodeId a) const;
+  [[nodiscard]] std::vector<std::vector<NodeId>> dfs(NodeId a) const;
+  [[nodiscard]] std::vector<NodeId> out_dfs(NodeId a) const;
   [[nodiscard]] std::optional<std::vector<NodeId>>
   shortest_path(NodeId a, NodeId b) const;
+  std::vector<std::vector<NodeId>> kasoraju() const;
 
 private:
   // Internal helpers speak indices only
   [[nodiscard]] std::span<const Edge> neighbors(VertexId idx) const;
   [[nodiscard]] std::vector<std::vector<NodeId>>
   to_external(const std::vector<std::vector<VertexId>> &levels) const;
+  [[nodiscard]] std::vector<NodeId>
+  to_external(const std::vector<VertexId> &levels) const;
 };
 
 } // namespace graph

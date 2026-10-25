@@ -1,0 +1,136 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "name": "Alice",
+      "age": 24
+    },
+    {
+      "id": 1,
+      "name": "Bob",
+      "age": 27
+    },
+    {
+      "id": 2,
+      "name": "Charlie",
+      "age": 23
+    },
+    {
+      "id": 3,
+      "name": "Daniel",
+      "age": 18
+    },
+    {
+      "id": 4,
+      "name": "Eric",
+      "age": 19
+    },
+    {
+      "id": 5,
+      "name": "Fatoumata",
+      "age": 67
+    },
+    {
+      "id": 6,
+      "name": "Fatoumata",
+      "age": 67
+    },
+    {
+      "id": 7,
+      "name": "Fatoumata",
+      "age": 67
+    },
+    {
+      "id": 8,
+      "name": "Fatoumata",
+      "age": 67
+    },
+    {
+      "id": 9,
+      "name": "Fatoumata",
+      "age": 67
+    }
+  ],
+  "edges": [
+    {
+      "source": 0,
+      "target": 7,
+      "type": "friend"
+    },
+    {
+      "source": 0,
+      "target": 1,
+      "type": "follows"
+    },
+    {
+      "source": 1,
+      "target": 1,
+      "type": "follows"
+    },
+    {
+      "source": 1,
+      "target": 2,
+      "type": "friend"
+    },
+    {
+      "source": 2,
+      "target": 5,
+      "type": "follows"
+    },
+    {
+      "source": 5,
+      "target": 6,
+      "type": "follows"
+    },
+    {
+      "source": 5,
+      "target": 3,
+      "type": "follows"
+    },
+    {
+      "source": 5,
+      "target": 9,
+      "type": "follows"
+    },
+    {
+      "source": 6,
+      "target": 2,
+      "type": "follows"
+    },
+    {
+      "source": 3,
+      "target": 2,
+      "type": "follows"
+    },
+    {
+      "source": 3,
+      "target": 4,
+      "type": "follows"
+    },
+    {
+      "source": 4,
+      "target": 9,
+      "type": "friend"
+    },
+    {
+      "source": 8,
+      "target": 9,
+      "type": "follows"
+    },
+    {
+      "source": 8,
+      "target": 6,
+      "type": "follows"
+    },
+    {
+      "source": 7,
+      "target": 6,
+      "type": "follows"
+    },
+    {
+      "source": 7,
+      "target": 8,
+      "type": "follows"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <graph.hpp>
 #include <optional>
 #include <queue>
@@ -67,6 +68,14 @@ Graph::to_external(const std::vector<std::vector<VertexId>> &levels) const {
          std::ranges::to<std::vector>();
 }
 
+std::vector<NodeId>
+Graph::to_external(const std::vector<VertexId> &levels) const {
+  return levels | std::views::transform([&](VertexId idx) {
+           return id_mapper.to_ext[idx];
+         }) |
+         std::ranges::to<std::vector>();
+}
+
 std::vector<std::vector<NodeId>> Graph::bfs(NodeId a_id) const {
   const VertexId a = id_mapper.to_idx.at(a_id);
 
@@ -104,28 +113,40 @@ std::vector<std::vector<NodeId>> Graph::dfs(NodeId a_id) const {
   const VertexId a = id_mapper.to_idx.at(a_id);
 
   std::vector<bool> visited(nodes.size(), false);
-  visited[a] = true;
 
   std::vector<std::vector<VertexId>> result{{a}};
 
   auto recurse = [&](this auto &&self, const VertexId &top,
                      const std::size_t depth = 0) -> void {
+    visited[top] = true;
     for (const auto &e : neighbors(top)) {
       if (visited[e.to])
         continue;
-      visited[e.to] = true;
-
-      if (result.size() <= depth + 1) {
-        result.push_back({e.to});
-      } else {
-        result[depth + 1].push_back(e.to);
-      }
 
       self(e.to, depth + 1);
     }
   };
 
   recurse(a);
+
+  return to_external(result);
+}
+
+std::vector<NodeId> Graph::out_dfs(NodeId a_id) const {
+  const VertexId a = id_mapper.to_idx.at(a_id);
+  std::vector<bool> visited(nodes.size(), false);
+  std::vector<VertexId> result(nodes.size());
+
+  auto recurse = [&](this auto &&self, const VertexId &top) {
+    visited[top] = true;
+    for (const auto &e : neighbors(top)) {
+      if (visited[e.to])
+        continue;
+
+      self(e.to);
+    }
+    result.push_back(top);
+  };
 
   return to_external(result);
 }
@@ -174,6 +195,66 @@ std::optional<std::vector<NodeId>> Graph::shortest_path(NodeId a_id,
   }
 
   return std::nullopt;
+}
+
+std::vector<std::vector<NodeId>> Graph::kasoraju() const {
+  const auto node_count = nodes.size();
+
+  std::vector<std::vector<VertexId>> components;
+  std::vector<VertexId> order;
+  std::vector<bool> visited(node_count, false);
+
+  std::vector<std::vector<VertexId>> adj(node_count);
+  for (auto v{0uz}; v < node_count; ++v) {
+    for (const auto &e : neighbors(v)) {
+      adj[v].push_back(e.to);
+    }
+  }
+
+  auto out_dfs = [&visited, this](this auto &&self, const auto &top,
+                                  const std::vector<std::vector<VertexId>> &adj,
+                                  std::vector<VertexId> &output) -> void {
+    visited[top] = true;
+    for (const auto &v : adj[top]) {
+      if (visited[v])
+        continue;
+
+      self(v, adj, output);
+    }
+    output.push_back(top);
+  };
+
+  for (auto idx{0uz}; idx < node_count; ++idx) {
+    if (visited[idx])
+      continue;
+    out_dfs(idx, adj, order);
+  }
+
+  std::vector<std::vector<VertexId>> adj_rev(node_count);
+  for (auto v{0uz}; v < node_count; ++v) {
+    for (const auto &e : neighbors(v)) {
+      adj_rev[e.to].push_back(v);
+    }
+  }
+
+  visited.assign(node_count, false);
+  std::ranges::reverse(order);
+
+  std::vector<VertexId> roots(node_count, 0);
+
+  for (auto v : order) {
+    if (!visited[v]) {
+      std::vector<VertexId> component;
+      out_dfs(v, adj_rev, component);
+      components.push_back(component);
+
+      VertexId root = component.front();
+      for (const auto u : component)
+        roots[u] = root;
+    }
+  }
+
+  return to_external(components);
 }
 
 } // namespace graph
