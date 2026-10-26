@@ -4,39 +4,20 @@
 #include <print>
 #include <utility>
 
-constexpr std::string_view to_string(graph::Relation rel) {
-  switch (rel) {
-  case graph::Relation::Coworker:
-    return "coworker";
-  case graph::Relation::Follows:
-    return "follows";
-  case graph::Relation::Friend:
-    return "friend";
-  }
-}
-
-void write_dot(const graph::Graph &g, std::ostream &os,
-               std::span<const int> color = {}) {
-  os << "digraph G {\n";
-  for (uint32_t u = 0; u < g.nodes.size(); ++u) {
-    os << " " << u << " [label=" << g.nodes[u].name << "";
-    if (!color.empty())
-      os << " style=filled colorscheme=set312 fillcolor="
-         << (color[u] % 12) + 1;
-    os << "];\n";
-    for (const auto &e : g.neighbors(u))
-      os << " " << u << " -> " << e.to << " [label=" << to_string(e.relation)
-         << "];\n";
-  }
-  os << "}\n";
-}
-
 int main() {
-  graph::Graph graph = loader::load_json("data/kosaraju.json");
+  graph::Graph graph = loader::load_json("data/huge_relations.json");
 
   [[maybe_unused]] const auto bfs = graph.bfs(graph::NodeId{0});
+  std::println("[BFS]:");
+  for (const auto &l : bfs) {
+    for (const auto &v : l) {
+      std::print("{} ", std::to_underlying(v));
+    }
+    std::println();
+  }
 
-  [[maybe_unused]] const auto dfs = graph.kosaraju();
+  [[maybe_unused]] const auto dfs = graph.dfs(graph::NodeId{0});
+  std::println("[DFS]:");
   for (const auto &l : dfs) {
     for (const auto &v : l) {
       std::print("{} ", std::to_underlying(v));
@@ -44,9 +25,22 @@ int main() {
     std::println();
   }
 
+  std::println("[KOSARAJU]:");
+  [[maybe_unused]] const auto kosaraju = graph.kosaraju();
+  for (const auto &l : kosaraju) {
+    for (const auto &v : l) {
+      std::print("{} ", std::to_underlying(v));
+    }
+    std::println();
+  }
+
+  std::println("[SHORTEST_PATH]");
   [[maybe_unused]] const auto path =
       graph.shortest_path(graph::NodeId{0}, graph::NodeId{4});
+  for (const auto &v : path.value()) {
+    std::print("{} ", std::to_underlying(v));
+  }
 
-  std::ofstream file("graph.txt");
-  write_dot(graph, file);
+  std::ofstream file("graph.dot");
+  file << graph;
 }

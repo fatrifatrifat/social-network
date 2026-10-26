@@ -73,6 +73,7 @@ struct Graph {
   shortest_path(NodeId a, NodeId b) const;
   std::vector<std::vector<NodeId>> kosaraju() const;
   [[nodiscard]] std::span<const Edge> neighbors(VertexId idx) const;
+  friend std::ostream &operator<<(std::ostream &out, const Graph &graph);
 
 private:
   // Internal helpers speak indices only
