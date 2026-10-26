@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <graph.hpp>
 #include <optional>
+#include <ostream>
 #include <queue>
 #include <ranges>
 #include <span>
@@ -105,12 +106,15 @@ std::vector<std::vector<NodeId>> Graph::dfs(NodeId a_id) const {
   const VertexId a = id_mapper.to_idx.at(a_id);
 
   std::vector<bool> visited(nodes.size(), false);
-
-  std::vector<std::vector<VertexId>> result{{a}};
+  std::vector<std::vector<VertexId>> result;
 
   auto recurse = [&](this auto &&self, const VertexId &top,
                      const std::size_t depth = 0) -> void {
     visited[top] = true;
+    if (result.size() == depth)
+      result.emplace_back();
+
+    result[depth].push_back(top);
     for (const auto &e : neighbors(top)) {
       if (visited[e.to])
         continue;
@@ -235,4 +239,36 @@ std::vector<std::vector<VertexId>> Graph::reverse_adjacency() const {
 
   return adj;
 }
+
+namespace {
+
+constexpr std::string_view to_string(graph::Relation rel) {
+  switch (rel) {
+  case graph::Relation::Coworker:
+    return "coworker";
+  case graph::Relation::Follows:
+    return "follows";
+  case graph::Relation::Friend:
+    return "friend";
+  }
+}
+
+void write_dot(const graph::Graph &g, std::ostream &os,
+               std::span<const int> color = {}) {}
+} // namespace
+
+std::ostream &operator<<(std::ostream &out, const Graph &graph) {
+  out << "digraph G {\n";
+  for (uint32_t u = 0; u < graph.nodes.size(); ++u) {
+    out << " " << u << " [label=\"" << graph.nodes[u].name << "\"];\n";
+    for (const auto &e : graph.neighbors(u)) {
+      out << " " << u << " -> " << e.to << " [label=\"" << to_string(e.relation)
+          << "\"];\n";
+    }
+  }
+
+  out << "}\n";
+  return out;
+}
+
 } // namespace graph
