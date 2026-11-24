@@ -51,18 +51,6 @@ Graph Graph::from_edges(std::vector<Node> nodes,
   return graph;
 }
 
-constexpr std::string_view Graph::to_string(graph::Relation rel) {
-  switch (rel) {
-  case graph::Relation::Coworker:
-    return "coworker";
-  case graph::Relation::Follows:
-    return "follows";
-  case graph::Relation::Friend:
-    return "friend";
-  }
-  std::terminate();
-}
-
 std::span<const Edge> Graph::neighbors(const VertexId idx) const {
   const auto begin = offsets[idx];
   const auto end = offsets[idx + 1];

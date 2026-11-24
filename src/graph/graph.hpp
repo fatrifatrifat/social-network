@@ -65,7 +65,17 @@ struct Graph {
   [[nodiscard]] static Graph
   from_edges(std::vector<Node> nodes, std::span<const ExternalEdge> relations);
   [[nodiscard]] static constexpr std::string_view
-  to_string(graph::Relation rel);
+  to_string(graph::Relation rel) {
+    switch (rel) {
+    case graph::Relation::Coworker:
+      return "coworker";
+    case graph::Relation::Follows:
+      return "follows";
+    case graph::Relation::Friend:
+      return "friend";
+    }
+    std::terminate();
+  }
 
   // Public API speaks external ids only
   [[nodiscard]] std::vector<std::vector<NodeId>> bfs(NodeId a) const;
