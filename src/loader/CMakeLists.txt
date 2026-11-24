@@ -10,10 +10,12 @@ target_sources(loader
 )
 
 find_package(simdjson REQUIRED)
+find_package(libpqxx REQUIRED)
 
 target_link_libraries(loader
   PUBLIC
     graph
   PRIVATE
     simdjson::simdjson
+    libpqxx::pqxx
 )

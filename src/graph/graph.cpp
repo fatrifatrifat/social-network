@@ -240,30 +240,13 @@ std::vector<std::vector<VertexId>> Graph::reverse_adjacency() const {
   return adj;
 }
 
-namespace {
-
-constexpr std::string_view to_string(graph::Relation rel) {
-  switch (rel) {
-  case graph::Relation::Coworker:
-    return "coworker";
-  case graph::Relation::Follows:
-    return "follows";
-  case graph::Relation::Friend:
-    return "friend";
-  }
-}
-
-void write_dot(const graph::Graph &g, std::ostream &os,
-               std::span<const int> color = {}) {}
-} // namespace
-
 std::ostream &operator<<(std::ostream &out, const Graph &graph) {
   out << "digraph G {\n";
   for (uint32_t u = 0; u < graph.nodes.size(); ++u) {
     out << " " << u << " [label=\"" << graph.nodes[u].name << "\"];\n";
     for (const auto &e : graph.neighbors(u)) {
-      out << " " << u << " -> " << e.to << " [label=\"" << to_string(e.relation)
-          << "\"];\n";
+      out << " " << u << " -> " << e.to << " [label=\""
+          << Graph::to_string(e.relation) << "\"];\n";
     }
   }
 

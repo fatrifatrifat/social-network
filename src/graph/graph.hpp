@@ -20,9 +20,8 @@ using Weight = float;
 // When persisting node data to the psql database, with time and multiple
 // deletes, the ids of the nodes may not be sequential anymore, and would have
 // gaps between each other. So we can't rely on those ids to build our CSR graph
-// (especially the offset array)
-// So here we map the ids we read to actual sequential ids with no gaps that
-// won't change
+// (especially the offset array) So here we map the ids we read to actual
+// sequential ids with no gaps that won't change
 struct IdMapper {
   std::vector<NodeId> to_ext;                  // Mapping index -> id
   std::unordered_map<NodeId, VertexId> to_idx; // Mapping id -> index
@@ -65,6 +64,18 @@ struct Graph {
 
   [[nodiscard]] static Graph
   from_edges(std::vector<Node> nodes, std::span<const ExternalEdge> relations);
+  [[nodiscard]] static constexpr std::string_view
+  to_string(graph::Relation rel) {
+    switch (rel) {
+    case graph::Relation::Coworker:
+      return "coworker";
+    case graph::Relation::Follows:
+      return "follows";
+    case graph::Relation::Friend:
+      return "friend";
+    }
+    std::terminate();
+  }
 
   // Public API speaks external ids only
   [[nodiscard]] std::vector<std::vector<NodeId>> bfs(NodeId a) const;
